@@ -1,58 +1,47 @@
-import { Component } from 'react';
 import { nanoid } from 'nanoid';
 
-export class ContactForm extends Component {
-  state = {
-    name: '',
-    number: '',
-    id: '',
-  };
-  onInputChange = e => {
-    this.setState({
-      [e.target.name]: e.target.value.trim(),
-    });
-  };
-  onFormSubmit = e => {
+export const ContactForm = ({ sendContact }) => {
+  const onSubmit = e => {
     e.preventDefault();
-    this.setState({
+    let obj = {
       id: nanoid(),
-    });
-    this.props.sendContact(this.state) && e.target.reset();
+    };
+    const data = new FormData(e.target);
+    for (const [key, value] of data) {
+      obj[key] = value;
+    }
+    sendContact(obj) && e.target.reset();
   };
 
-  render() {
-    return (
-      <form onSubmit={this.onFormSubmit}>
-        <label>
-          Name
-          <br />
-          <input
-            onChange={this.onInputChange}
-            type="text"
-            name="name"
-            pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-            title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
-            required
-          />
-        </label>
+  return (
+    <form onSubmit={onSubmit}>
+      <label>
+        Name
         <br />
+        <input
+          type="text"
+          name="name"
+          pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
+          title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
+          required
+        />
+      </label>
+      <br />
+      <br />
+      <label>
+        Phone
         <br />
-        <label>
-          Phone
-          <br />
-          <input
-            onChange={this.onInputChange}
-            type="tel"
-            name="number"
-            pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-            title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
-            required
-          />
-        </label>
-        <br />
-        <br />
-        <button type="submit">Add contact</button>
-      </form>
-    );
-  }
-}
+        <input
+          type="tel"
+          name="number"
+          pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
+          title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
+          required
+        />
+      </label>
+      <br />
+      <br />
+      <button type="submit">Add contact</button>
+    </form>
+  );
+};
