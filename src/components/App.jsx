@@ -19,7 +19,7 @@ export const App = () => {
   const [filter, setFilter] = useState('');
   useEffect(() => {
     save(key, contacts);
-  });
+  }, [contacts]);
   const onInputChange = e => {
     setFilter(e.target.value.trim());
   };
