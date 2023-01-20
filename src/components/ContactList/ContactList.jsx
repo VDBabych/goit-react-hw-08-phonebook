@@ -1,12 +1,14 @@
 import { Notification } from 'components/Notification/Notification';
+import { useDispatch, useSelector } from 'react-redux';
+import { deleteContact } from 'redux/contactsSlice/contactsSlice';
 
-export const ContactList = ({ contacts, filter, btnAction }) => {
+export const ContactList = () => {
+  const contacts = useSelector(state => state.contacts.contacts);
+  const filter = useSelector(state => state.contacts.filter);
+  const dispatch = useDispatch();
   const filteredContacts = contacts.filter(el =>
-    el.name.toLowerCase().includes(filter.toLowerCase())
+    el.name.toLowerCase().includes(filter.trim().toLowerCase())
   );
-  const onBtnClick = e => {
-    btnAction(e.target.dataset.id);
-  };
 
   if (filteredContacts.length === 0) {
     return <Notification message="There is no matches" />;
@@ -16,7 +18,7 @@ export const ContactList = ({ contacts, filter, btnAction }) => {
       {filteredContacts.map(({ number, name, id }) => (
         <li key={id}>
           {name}: {number}{' '}
-          <button onClick={onBtnClick} data-id={id} type="button">
+          <button onClick={e => dispatch(deleteContact(id))} type="button">
             Delete
           </button>
         </li>

@@ -1,8 +1,15 @@
 import { nanoid } from 'nanoid';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact } from 'redux/contactsSlice/contactsSlice';
 
-export const ContactForm = ({ sendContact }) => {
+export const ContactForm = () => {
+  const contacts = useSelector(state => state.contacts.contacts);
+  const dispatch = useDispatch();
   const onSubmit = e => {
     e.preventDefault();
+    if (contacts.some(el => el.name === e.target.elements.name.value)) {
+      return;
+    }
     let obj = {
       id: nanoid(),
     };
@@ -10,7 +17,8 @@ export const ContactForm = ({ sendContact }) => {
     for (const [key, value] of data) {
       obj[key] = value;
     }
-    sendContact(obj) && e.target.reset();
+    dispatch(addContact(obj));
+    e.target.reset();
   };
 
   return (
