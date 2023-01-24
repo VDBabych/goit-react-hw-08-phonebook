@@ -1,26 +1,104 @@
-import { createSlice } from "@reduxjs/toolkit";
-const initialState = {contacts:[
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ], filter: ''};
-const contactsSlice = createSlice({
-  name: "contacts",
-  initialState,
-    reducers: {
-        deleteContact: (state, action) => {
-            state.contacts = state.contacts.filter(el => el.id !== action.payload)
-        },
-        addContact: (state, action) => {
-            state.contacts = [...state.contacts, action.payload]
-        },
-        setFilter: (state, action) => {
-            state.filter = action.payload
-        },
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { addContact, deleteContact, getContacts } from 'utils/mockApi';
 
+export const requestGetContacts = createAsyncThunk(
+  'contacts/requestGetContacts',
+  async (_, thunkApi) => {
+    try {
+      const data = await getContacts();
+
+      return data;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const requestAddContact = createAsyncThunk(
+  'contacts/requestAddContacts',
+  async (contact, thunkApi) => {
+    try {
+      const data = await addContact(contact);
+
+      return data;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const requestDeleteContact = createAsyncThunk(
+  'contacts/requestDeleteContact',
+  async (id, thunkApi) => {
+    try {
+      const data = await deleteContact(id);
+
+      return data;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error.message);
+    }
+  }
+);
+
+const initialState = {
+  contacts: [],
+  isLoading: false,
+  error: '',
+  filter: '',
+};
+
+const contactsSlice = createSlice({
+  name: 'contacts',
+  initialState,
+  reducers: {
+    setFilter(state, action) {
+      state.filter = action.payload;
+    },
   },
+  extraReducers: builder =>
+    builder
+      .addCase(requestAddContact.pending, state => {
+        state.isLoading = true;
+        state.error = '';
+      })
+      .addCase(requestAddContact.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.contacts = [...state.contacts, action.payload];
+        console.log(state.contacts);
+      })
+      .addCase(requestAddContact.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(requestDeleteContact.pending, state => {
+        state.isLoading = true;
+        state.error = '';
+      })
+      .addCase(requestDeleteContact.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.contacts = state.contacts.filter(
+          el => el.id !== action.payload.id
+        );
+        console.log(state.contacts);
+      })
+      .addCase(requestDeleteContact.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(requestGetContacts.pending, state => {
+        state.isLoading = true;
+        state.error = '';
+      })
+      .addCase(requestGetContacts.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.contacts = action.payload;
+        console.log(state.contacts);
+      })
+      .addCase(requestGetContacts.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      }),
 });
-// Експортуємо генератори екшенів та редюсер
-export const {deleteContact, addContact, setFilter } = contactsSlice.actions;
+
+export const { setFilter } = contactsSlice.actions;
 export const contactsReducer = contactsSlice.reducer;

@@ -1,6 +1,6 @@
 import { Notification } from 'components/Notification/Notification';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteContact } from 'redux/contactsSlice/contactsSlice';
+import { requestDeleteContact } from 'redux/contactsSlice/contactsSlice';
 
 export const ContactList = () => {
   const contacts = useSelector(state => state.contacts.contacts);
@@ -15,10 +15,10 @@ export const ContactList = () => {
   }
   return (
     <ul>
-      {filteredContacts.map(({ number, name, id }) => (
+      {filteredContacts.map(({ phone, name, id }) => (
         <li key={id}>
-          {name}: {number}{' '}
-          <button onClick={e => dispatch(deleteContact(id))} type="button">
+          {name}: {phone}{' '}
+          <button onClick={e => dispatch(requestDeleteContact(id))} type="button">
             Delete
           </button>
         </li>
