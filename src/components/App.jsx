@@ -1,38 +1,55 @@
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { requestGetContacts } from 'redux/contactsSlice/contactsSlice';
-import { ContactForm } from './ContactForm/ContactForm';
-import { ContactList } from './ContactList/ContactList';
-import { Filter } from './Filter/Filter';
-import { Notification } from './Notification/Notification';
-import { Section } from './Section/Section';
-import { Spinner } from './Spinner/Spinner';
+import Appbar from './Appbar/Appbar';
+import { Routes, Route } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useEffect, lazy } from 'react';
+import { getCurrentUser } from 'redux/auth/authOperations';
+import PrivateRoute from './Appbar/PrivateRoute';
+import RestrictedRoute from './Appbar/RestrictedRoute';
+import { ChakraProvider } from '@chakra-ui/react';
+
+const Main = lazy(() => import('../Page/Main'));
+const RegisterForm = lazy(() => import('../Page/RegisterForm'));
+const LoginForm = lazy(() => import('../Page/LoginForm'));
+const UserContacts = lazy(() => import('../Page/UserContacts'));
 
 export const App = () => {
   const dispatch = useDispatch();
-  const contacts = useSelector(state => state.contacts.contacts);
-  const isLoading = useSelector(state => state.contacts.isLoading);
-  const error = useSelector(state => state.contacts.error);
 
   useEffect(() => {
-    dispatch(requestGetContacts());
+    dispatch(getCurrentUser());
   }, [dispatch]);
   return (
-    <>
-    {isLoading && <Spinner/>}
-    {error && <p>Oops, something went wrong... <b>{error}</b></p>}
-      <Section title="Phonebook">
-        <ContactForm />
-      </Section>
-      <br />
-      <Section title="Contacts">
-        <Filter />
-        {contacts.length > 0 ? (
-          <ContactList />
-        ) : (
-          <Notification message="There is nothing yet" />
-        )}
-      </Section>
-    </>
+    <ChakraProvider>
+      <Routes>
+        <Route path="/" element={<Appbar />}>
+          {' '}
+          <Route index element={<Main />} />
+          <Route
+            path="register"
+            element={
+              <RestrictedRoute
+                redirectTo="/contacts"
+                component={<RegisterForm />}
+              />
+            }
+          />
+          <Route
+            path="login"
+            element={
+              <RestrictedRoute
+                redirectTo="/contacts"
+                component={<LoginForm />}
+              />
+            }
+          />
+          <Route
+            path="contacts"
+            element={
+              <PrivateRoute redirectTo="/login" component={<UserContacts />} />
+            }
+          />
+        </Route>
+      </Routes>
+    </ChakraProvider>
   );
 };
